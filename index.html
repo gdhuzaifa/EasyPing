@@ -1,0 +1,82 @@
+// Set up canvas
+const canvas = document.getElementById('pingCanvas');
+const context = canvas.getContext('2d');
+const canvasWidth = 800;
+const canvasHeight = 400;
+
+// Create paddle
+const paddleWidth = 10;
+const paddleHeight = 80;
+let paddle1Y = (canvasHeight - paddleHeight) / 2;
+let paddle2Y = (canvasHeight - paddleHeight) / 2;
+const paddleSpeed = 5;
+
+// Create ball
+const ballSize = 10;
+let ballX = canvasWidth / 2;
+let ballY = canvasHeight / 2;
+let ballSpeedX = 5;
+let ballSpeedY = 5;
+
+// Update paddle position
+function updatePaddlePosition(event) {
+  const rect = canvas.getBoundingClientRect();
+  const mouseY = event.clientY - rect.top - paddleHeight / 2;
+  paddle1Y = mouseY;
+}
+
+// Move ball
+function moveBall() {
+  ballX += ballSpeedX;
+  ballY += ballSpeedY;
+
+  // Check collision with paddles
+  if (ballX <= paddleWidth && ballY > paddle1Y && ballY < paddle1Y + paddleHeight) {
+    ballSpeedX *= -1;
+  } else if (ballX >= canvasWidth - paddleWidth - ballSize && ballY > paddle2Y && ballY < paddle2Y + paddleHeight) {
+    ballSpeedX *= -1;
+  }
+
+  // Check collision with walls
+  if (ballY <= 0 || ballY >= canvasHeight - ballSize) {
+    ballSpeedY *= -1;
+  }
+
+  // Check if ball missed paddle
+  if (ballX < 0 || ballX > canvasWidth) {
+    resetBall();
+  }
+}
+
+// Reset ball position
+function resetBall() {
+  ballX = canvasWidth / 2;
+  ballY = canvasHeight / 2;
+  ballSpeedX *= -1;
+  ballSpeedY *= -1;
+}
+
+// Draw objects on canvas
+function draw() {
+  // Clear canvas
+  context.clearRect(0, 0, canvasWidth, canvasHeight);
+
+  // Draw paddles
+  context.fillRect(0, paddle1Y, paddleWidth, paddleHeight);
+  context.fillRect(canvasWidth - paddleWidth, paddle2Y, paddleWidth, paddleHeight);
+
+  // Draw ball
+  context.fillRect(ballX, ballY, ballSize, ballSize);
+}
+
+// Game loop
+function gameLoop() {
+  moveBall();
+  draw();
+}
+
+// Start the game loop
+setInterval(gameLoop, 1000 / 60);
+
+// Event listener for paddle movement
+canvas.addEventListener('mousemove', updatePaddlePosition);
